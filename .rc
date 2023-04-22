@@ -1,0 +1,71 @@
+# Nix
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
+# PATH
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Misc. variables
+export LC_ALL=en_US.UTF-8
+if command -v nvim &> /dev/null; then
+    export EDITOR="nvim"
+fi
+export PS1="$0 $ "
+export HOMEBREW_INSTALL_FROM_API=1
+
+# Aliases
+alias ll='ls -lAGFh'
+alias die='sudo shutdown -h now'
+
+alias mongorun='mongod --config /usr/local/etc/mongod.conf'
+alias redisrun='redis-server /usr/local/etc/redis.conf'
+alias psh='powershell.exe || powershell'
+
+## Neovim
+if command -v nvim &> /dev/null; then
+    alias vim='nvim';
+fi
+
+## Nix
+if command -v nix-shell &> /dev/null; then
+    alias nix-zsh="nix-shell --run 'zsh'"
+fi
+
+## NixOS
+if command -v nixos-rebuild &> /dev/null; then
+    alias nix-apply="sudo nixos-rebuild switch"
+fi
+
+[[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
+
+# Shortcuts
+c() {
+    LOC=${1:-.}
+    code "$(python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $LOC)"
+}
+
+pyv() {
+    if [ -f ./venv/bin/activate ]; then
+    	source ./venv/bin/activate
+    else
+    	echo "No venv here."
+    fi
+}
+
+pgr() {
+    ps aux | grep $@
+}
+
+git-rprune() {
+    git branch -vv | grep 'gone' | awk '{print $1}' | xargs git branch -D
+}
+
+gh-size() {
+    if [ -z "$@" ]; then
+        echo "Usage: ghsize <repo>/<owner>"
+        return 64
+    fi
+    curl -s https://api.github.com/repos/$1 | jq .size | numfmt --to=si --from-unit=1000
+}
