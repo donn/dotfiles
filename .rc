@@ -15,6 +15,11 @@ fi
 export PS1="$0 $ "
 export HOMEBREW_INSTALL_FROM_API=1
 
+## The Nix Fix™
+if [ -z "$LOCALE_ARCHIVE" ]; then
+    export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+fi
+
 # Aliases
 alias ll='ls -lAGFh'
 alias die='sudo shutdown -h now'
