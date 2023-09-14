@@ -26,11 +26,26 @@ alias die='sudo shutdown -h now'
 
 alias mongorun='mongod --config /usr/local/etc/mongod.conf'
 alias redisrun='redis-server /usr/local/etc/redis.conf'
-alias psh='powershell.exe || powershell'
+
+## PowerShell
+psh() {
+    if command -v powershell.exe; then
+        powershell.exe $@
+    else
+        powershell $@
+    fi
+}
 
 ## Neovim
 if command -v nvim &> /dev/null; then
     alias vim='nvim';
+fi
+
+## Open
+if ! command -v open &> /dev/null; then
+    if command -v xdg-open &> /dev/null; then
+        alias open=xdg-open
+    fi
 fi
 
 ## Nix
@@ -64,7 +79,8 @@ pgr() {
 }
 
 git-rprune() {
-    git branch -vv | grep 'gone' | awk '{print $1}' | xargs git branch -D
+    git fetch -p &&\
+        git branch -vv | grep 'gone' | awk '{print $1}' | xargs git branch -D
 }
 
 gh-size() {
