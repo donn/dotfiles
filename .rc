@@ -41,6 +41,10 @@ if command -v nvim &> /dev/null; then
     alias vim='nvim';
 fi
 
+if command -v lima &> /dev/null; then
+    alias docker='lima nerdctl';
+fi
+
 ## Open
 if ! command -v open &> /dev/null; then
     if command -v xdg-open &> /dev/null; then
@@ -53,9 +57,13 @@ if command -v nix-shell &> /dev/null; then
     alias nix-zsh="nix-shell --run 'zsh'"
 fi
 
-## NixOS
+## NixOS/Nix-Darwin
 if command -v nixos-rebuild &> /dev/null; then
-    alias nix-apply="sudo nixos-rebuild switch"
+    alias nixos-apply="sudo nixos-rebuild switch"
+fi
+
+if command -v darwin-rebuild &> /dev/null; then
+    alias darwin-apply="darwin-rebuild switch -I darwin-config=$HOME/nix-conf/darwin-configuration.nix"
 fi
 
 [[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
