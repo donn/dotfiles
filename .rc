@@ -41,6 +41,7 @@ if command -v nvim &> /dev/null; then
     alias vim='nvim';
 fi
 
+## Lima
 if command -v lima &> /dev/null; then
     alias docker='lima nerdctl';
 fi
@@ -55,6 +56,16 @@ fi
 ## Nix
 if command -v nix-shell &> /dev/null; then
     alias nix-zsh="nix-shell --run 'zsh'"
+fi
+
+if command -v nix &> /dev/null; then
+    nix-path() {
+        if [ -z "$@" ]; then
+            echo "Usage: $0 <pkg>"
+            return 64
+        fi
+        nix --extra-experimental-features nix-command eval -f '<nixpkgs>' --raw $1
+    }
 fi
 
 ## NixOS/Nix-Darwin
