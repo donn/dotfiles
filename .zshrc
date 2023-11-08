@@ -2,23 +2,16 @@ source ~/.rc
 
 autoload -Uz add-zsh-hook
 autoload -Uz vcs_info
+autoload -U colors && colors
 setopt prompt_subst
 
 # Colors
-FMT_RESET=$'%{\033[0m%}'
-FMT_BOLD=$'%{\033[2m%}'
-
-FGND_RESET=$'%{\033[39m%}'
-FGND_RED=$'%{\033[31m%}'
-FGND_LRED=$'%{\033[91m%}'
-FGND_LGRN=$'%{\033[92m%}'
 FGND_LBLUE=$'%{\033[94m%}'
-
 FGND_LORANGE=$'%{\033[38;5;214m%}'
 FGND_ORANGE=$'%{\033[38;5;202m%}'
 
 # Prompt
-PS1_formatted='[%D{%H:%M}] $FGND_LORANGE%n$FGND_RESET@$FGND_ORANGE%m$FGND_RESET:$FGND_LBLUE%~$FGND_RESET${PROMPT_TERMINATOR-%%} '
+PS1_formatted='[%D{%H:%M}] $FGND_LORANGE%n%{$reset_color%}@$FGND_ORANGE%m%{$reset_color%}:$FGND_LBLUE%~%{$reset_color%}${PROMPT_TERMINATOR-%%} '
 PS1=$PS1_formatted
 
 zstyle ':vcs_info:*' enable git
@@ -27,7 +20,19 @@ zstyle ':vcs_info:*' stagedstr '+'
 zstyle ':vcs_info:*' unstagedstr '*'   
 zstyle ':vcs_info:*' actionformats '%a:%b%u%c'
 zstyle ':vcs_info:*' formats '%b%u%c'
-RPS1='$FGND_LGRN${vcs_info_msg_0_}$FGND_RESET'
+RPS1='${EXIT_INFO}%{$fg[green]%}${vcs_info_msg_0_}%{$reset_color%}'
+# %(?..$FGND_RED%B(✖%?%)%b$FGND_RESET)
+exit_info() {
+    last_exit=$?
+    if [ "$last_exit" != "0" ]; then
+        export EXIT_INFO="%{$fg[red]%}%B($last_exit)%b ❌%{$reset_color%}"
+    else
+        export EXIT_INFO="⭕"
+    fi
+    if [ "${vcs_info_msg_0_}" != "" ]; then
+        export EXIT_INFO="$EXIT_INFO | "
+    fi
+}
 
 precmd_in_nix_shell() {
     if [ "$IN_NIX_SHELL" = "impure" ]; then
@@ -40,6 +45,7 @@ precmd_in_nix_shell() {
 }
 add-zsh-hook precmd precmd_in_nix_shell
 add-zsh-hook precmd vcs_info
+add-zsh-hook precmd exit_info
 
 alt_ps1() {
     export PS1="%~%% "
