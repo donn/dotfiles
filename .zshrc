@@ -21,11 +21,16 @@ zstyle ':vcs_info:*' unstagedstr '*'
 zstyle ':vcs_info:*' actionformats '%a:%b%u%c'
 zstyle ':vcs_info:*' formats '%b%u%c'
 RPS1='${EXIT_INFO}%{$fg[green]%}${vcs_info_msg_0_}%{$reset_color%}'
-# %(?..$FGND_RED%B(✖%?%)%b$FGND_RESET)
+
 exit_info() {
     last_exit=$?
     if [ "$last_exit" != "0" ]; then
-        export EXIT_INFO="%{$fg[red]%}%B($last_exit)%b ❌%{$reset_color%}"
+        MESSAGE=$last_exit
+        if (( $last_exit > 128 )); then
+            sig=$(($last_exit - 128))
+            MESSAGE="SIG$(kill -l $sig)"
+        fi
+        export EXIT_INFO="%{$fg[red]%}%B($MESSAGE)%b ❌%{$reset_color%}"
     else
         export EXIT_INFO="⭕"
     fi
