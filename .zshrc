@@ -2,8 +2,17 @@ source ~/.rc
 
 autoload -Uz add-zsh-hook
 autoload -Uz vcs_info
+autoload -U compinit && compinit
 autoload -U colors && colors
 setopt prompt_subst
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+
+export SAVEHIST=1000
+export HISTSIZE=999
+
+bindkey '\e[A' history-beginning-search-backward
+bindkey '\e[B' history-beginning-search-forward
 
 # Colors
 FGND_LBLUE=$'%{\033[94m%}'
