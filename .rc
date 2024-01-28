@@ -63,6 +63,39 @@ if command -v nix &> /dev/null; then
         fi
         nix --extra-experimental-features nix-command eval -f '<nixpkgs>' --raw $1
     }
+
+    if command -v lima &> /dev/null; then
+        _nix-flake-build-all() {
+            push_repo=
+            cachix_jobs=8
+            args=()
+            while [ $# -gt 0 ]; do
+                if [ "$1" = "-push" ]; then
+                    push_repo="$2"
+                    shift
+                elif [ "$1" = "-jobs" ]; then
+                    cachix_jobs="$2"
+                    shift
+                else
+                    args+=("$1")
+                fi
+                shift
+            done
+            push_cmd=
+            if [ "$push_repo" != "" ]; then
+                push_cmd=" | cachix push $push_repo -j $cachix_jobs"
+            fi
+            bash -ic        "nix build --print-out-paths --no-link --option system aarch64-darwin   --extra-platforms aarch64-darwin    $args ${push_cmd}"
+            bash -ic        "nix build --print-out-paths --no-link --option system x86_64-darwin    --extra-platforms x86_64-darwin     $args ${push_cmd}"
+            lima bash -ic   "nix build --print-out-paths --no-link --option system aarch64-linux    --extra-platforms aarch64-linux     $args ${push_cmd}" 
+            lima bash -ic   "nix build --print-out-paths --no-link --option system x86_64-linux     --extra-platforms x86_64-linux      $args ${push_cmd}"
+            set +e
+        }
+        nix-flake-build-all() {
+            ( set -e; _nix-flake-build-all $@ )
+            return $?
+        }
+    fi
 fi
 
 ## NixOS/Nix-Darwin
