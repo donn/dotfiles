@@ -61,7 +61,7 @@ if command -v nix &> /dev/null; then
             echo "Usage: $0 <pkg>"
             return 64
         fi
-        nix --extra-experimental-features nix-command eval -f '<nixpkgs>' --raw $1
+        nix eval --raw $1
     }
 
     if command -v lima &> /dev/null; then
@@ -85,11 +85,14 @@ if command -v nix &> /dev/null; then
             if [ "$push_repo" != "" ]; then
                 push_cmd=" | cachix push $push_repo -j $cachix_jobs"
             fi
-            bash -ic        "nix build --print-out-paths --no-link --option system aarch64-darwin   --extra-platforms aarch64-darwin    $args ${push_cmd}"
-            bash -ic        "nix build --print-out-paths --no-link --option system x86_64-darwin    --extra-platforms x86_64-darwin     $args ${push_cmd}"
-            lima bash -ic   "nix build --print-out-paths --no-link --option system aarch64-linux    --extra-platforms aarch64-linux     $args ${push_cmd}" 
-            lima bash -ic   "nix build --print-out-paths --no-link --option system x86_64-linux     --extra-platforms x86_64-linux      $args ${push_cmd}"
-            set +e
+            echo "> Building aarch64-darwin…"
+            bash -c        "nix build --print-out-paths --no-link --option system aarch64-darwin   --extra-platforms aarch64-darwin    $args ${push_cmd}"
+            echo "> Building x86_64-darwin…"
+            bash -c        "nix build --print-out-paths --no-link --option system x86_64-darwin    --extra-platforms x86_64-darwin     $args ${push_cmd}"
+            echo "> Building aarch64-linux…"
+            lima bash -c   "nix build --print-out-paths --no-link --option system aarch64-linux    --extra-platforms aarch64-linux     $args ${push_cmd}" 
+            echo "> Building x86_64-linux:"
+            lima bash -c   "nix build --print-out-paths --no-link --option system x86_64-linux     --extra-platforms x86_64-linux      $args ${push_cmd}"
         }
         nix-flake-build-all() {
             ( set -e; _nix-flake-build-all $@ )
@@ -137,5 +140,5 @@ gh-size() {
         echo "Usage: ghsize <repo>/<owner>"
         return 64
     fi
-    curl -s https://api.github.com/repos/$1 | jq .size | numfmt --to=si --from-unit=1000
+    curl -s https://api.github.com/repos/$1 | jq .size
 }
