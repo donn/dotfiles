@@ -63,6 +63,19 @@ if command -v nix &> /dev/null; then
         fi
         nix eval --raw $1
     }
+    
+    nix-current-system() {
+        ARCH="$(uname -m)"
+        if [ "$ARCH" = "arm64" ]; then
+            ARCH="aarch64"
+        fi
+        KERNEL="$(uname | awk '{print tolower($0)}')"
+        printf "$ARCH-$KERNEL"
+    }
+    
+    nix-flake-list-packages() {
+        nix flake show --json --all-systems | jq -r ".packages.\"$(nix-current-system)\" | keys[]"
+    }
 
     if command -v lima &> /dev/null; then
         _nix-flake-build-all() {
@@ -86,13 +99,13 @@ if command -v nix &> /dev/null; then
                 push_cmd=" | cachix push $push_repo -j $cachix_jobs"
             fi
             echo "> Building aarch64-darwin…"
-            bash -c        "nix build --print-out-paths --no-link --option system aarch64-darwin   --extra-platforms aarch64-darwin    $args ${push_cmd}"
+            bash -lc        "nix build --print-out-paths --no-link --option system aarch64-darwin   --extra-platforms aarch64-darwin    $args ${push_cmd}"
             echo "> Building x86_64-darwin…"
-            bash -c        "nix build --print-out-paths --no-link --option system x86_64-darwin    --extra-platforms x86_64-darwin     $args ${push_cmd}"
+            bash -lc        "nix build --print-out-paths --no-link --option system x86_64-darwin    --extra-platforms x86_64-darwin     $args ${push_cmd}"
             echo "> Building aarch64-linux…"
-            lima bash -c   "nix build --print-out-paths --no-link --option system aarch64-linux    --extra-platforms aarch64-linux     $args ${push_cmd}" 
+            lima bash -lc   "nix build --print-out-paths --no-link --option system aarch64-linux    --extra-platforms aarch64-linux     $args ${push_cmd}" 
             echo "> Building x86_64-linux:"
-            lima bash -c   "nix build --print-out-paths --no-link --option system x86_64-linux     --extra-platforms x86_64-linux      $args ${push_cmd}"
+            lima bash -lc   "nix build --print-out-paths --no-link --option system x86_64-linux     --extra-platforms x86_64-linux      $args ${push_cmd}"
         }
         nix-flake-build-all() {
             ( set -e; _nix-flake-build-all $@ )
