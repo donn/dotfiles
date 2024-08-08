@@ -4,6 +4,7 @@ autoload -Uz add-zsh-hook
 autoload -Uz vcs_info
 autoload -U compinit && compinit
 autoload -U colors && colors
+setopt autocd
 setopt prompt_subst
 setopt SHARE_HISTORY
 setopt HIST_EXPIRE_DUPS_FIRST
@@ -87,3 +88,7 @@ cremake () {
     rm -rf EmptyDirectory `find . -mindepth 1`
     cmake $@
 }
+
+# Google Cloud SDK
+if [ -f '$HOME/bin/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/donn/bin/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '$HOME/bin/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/donn/bin/google-cloud-sdk/completion.zsh.inc'; fi

@@ -24,10 +24,9 @@ fi
 
 # Aliases
 alias ll='ls -lAGFh'
-alias die='sudo shutdown -h now'
+alias die='sudo shutdown -h now' 
 
-alias mongorun='mongod --config /usr/local/etc/mongod.conf'
-alias redisrun='redis-server /usr/local/etc/redis.conf'
+[[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
 
 ## PowerShell
 psh() {
@@ -114,16 +113,15 @@ if command -v nix &> /dev/null; then
     fi
 fi
 
-## NixOS/Nix-Darwin
-if command -v nixos-rebuild &> /dev/null; then
-    alias nixos-apply="sudo nixos-rebuild switch"
-fi
+## Lima
 
-if command -v darwin-rebuild &> /dev/null; then
-    alias darwin-apply="darwin-rebuild switch -I darwin-config=$HOME/nix-conf/darwin-configuration.nix"
+if command -v lima &> /dev/null; then
+# Lima BEGIN
+# Make sure iptables and mount.fuse3 are available
+PATH="$PATH:/usr/local/bin:/usr/sbin:/sbin"
+export PATH
+# Lima END
 fi
-
-[[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
 
 # Shortcuts
 c() {
