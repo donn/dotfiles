@@ -88,7 +88,3 @@ cremake () {
     rm -rf EmptyDirectory `find . -mindepth 1`
     cmake $@
 }
-
-# Google Cloud SDK
-if [ -f '$HOME/bin/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/donn/bin/google-cloud-sdk/path.zsh.inc'; fi
-if [ -f '$HOME/bin/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/donn/bin/google-cloud-sdk/completion.zsh.inc'; fi
