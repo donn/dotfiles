@@ -1,13 +1,26 @@
 # Nix
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+nix_profile_base=/nix/var/nix/profiles/default
+## if environment is set by NixOS or Nix-Darwin, use that Nix
+# if command -v nix 2>&1 > /dev/null; then
+#     nix_profile_base="$(perl -e "use File::Basename; print(dirname(dirname(readlink('$(which nix)'))))")"
+# fi
+if [ -e "$nix_base/etc/profile.d/nix-daemon.sh" ]; then
+  . "$nix_base/etc/profile.d/nix-daemon.sh"
 fi
 
 # PATH
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.mint/bin:$PATH"
-export PATH="$HOME/go/bin:$PATH"
+case ":${PATH}:" in
+    *:"$HOME/.cargo/bin":*)
+        ;;
+    *)
+    # Prepending path in case a system-installed rustc needs to be overridden
+    export PATH="$HOME/.cargo/bin:$PATH"
+    ;;
+esac
 
 # Misc. variables
 export LC_ALL=en_US.UTF-8
@@ -23,8 +36,12 @@ if [ -z "$LOCALE_ARCHIVE" ]; then
 fi
 
 # Aliases
-alias ll='ls -lAGFh'
-alias die='sudo shutdown -h now' 
+ll() {
+    ls -lAGFh $@
+}
+die() {
+    sudo shutdown -h now
+}
 
 [[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
 
