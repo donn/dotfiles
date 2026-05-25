@@ -73,6 +73,7 @@ add-zsh-hook precmd exit_info
 
 alt_ps1() {
     export PS1="%~%% "
+    export RPS1=""
 }
 
 # Aliases

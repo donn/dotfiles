@@ -1,26 +1,11 @@
-# Nix
-nix_profile_base=/nix/var/nix/profiles/default
-## if environment is set by NixOS or Nix-Darwin, use that Nix
-# if command -v nix 2>&1 > /dev/null; then
-#     nix_profile_base="$(perl -e "use File::Basename; print(dirname(dirname(readlink('$(which nix)'))))")"
-# fi
-if [ -e "$nix_base/etc/profile.d/nix-daemon.sh" ]; then
-  . "$nix_base/etc/profile.d/nix-daemon.sh"
-fi
-
 # PATH
+## Nix sometimes already exists but is aliased, always ensure it's prioritized at this points
+export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.mint/bin:$PATH"
-case ":${PATH}:" in
-    *:"$HOME/.cargo/bin":*)
-        ;;
-    *)
-    # Prepending path in case a system-installed rustc needs to be overridden
-    export PATH="$HOME/.cargo/bin:$PATH"
-    ;;
-esac
+export PATH="$HOME/.cargo/bin:$PATH"
 
 # Misc. variables
 export LC_ALL=en_US.UTF-8
@@ -28,9 +13,8 @@ if command -v nvim &> /dev/null; then
     export EDITOR="nvim"
 fi
 export PS1="$0 $ "
-export HOMEBREW_INSTALL_FROM_API=1
 
-## The Nix Fix™
+## Fix Nix locales on Linux
 if [ -z "$LOCALE_ARCHIVE" ]; then
     export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 fi
@@ -39,11 +23,6 @@ fi
 ll() {
     ls -lAGFh $@
 }
-die() {
-    sudo shutdown -h now
-}
-
-[[ "$TERM" == "xterm-kitty" ]] && alias kssh="kitty +kitten ssh"
 
 ## PowerShell
 psh() {
@@ -93,6 +72,10 @@ if command -v nix &> /dev/null; then
         nix flake show --json --all-systems | jq -r ".packages.\"$(nix-current-system)\" | keys[]"
     }
 
+    nixzsh() {
+        nix develop $@ --command zsh
+    }
+
     if command -v lima &> /dev/null; then
         _nix-flake-build-all() {
             push_repo=
@@ -140,7 +123,7 @@ export PATH
 # Lima END
 fi
 
-# Google Cloud
+## Google Cloud
 ## The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/donn/bin/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/donn/bin/google-cloud-sdk/path.zsh.inc'; fi
 
@@ -154,11 +137,19 @@ c() {
     code "$(python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $LOC)"
 }
 
+z() {
+    LOC=${1:-.}
+    zed "$(python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $LOC)"
+}
+
 pyv() {
     if [ -f ./venv/bin/activate ]; then
-    	source ./venv/bin/activate
+        source ./venv/bin/activate
+    elif [ -f ./.venv/bin/activate ]; then
+        source ./.venv/bin/activate
     else
-    	echo "No venv here."
+        echo "No venv here."
+        return 1
     fi
 }
 
@@ -167,8 +158,43 @@ pgr() {
 }
 
 git-rprune() {
-    git fetch -p &&\
-        git branch -vv | grep 'gone' | awk '{print $1}' | xargs git branch -D
+cat <<HEREDOC | python3 -
+from subprocess import check_output, check_call
+import sys
+result = check_output([
+    "git",
+    "branch",
+    "-vv",
+    "--format=%(refname:short);%(upstream:short);%(upstream:track,nobracket);%(worktreepath)"
+], encoding="utf8")
+for line in result.splitlines():
+    local, remote, remote_status, worktree = line.strip().split(";")
+    if remote_status == "gone":
+        print(f"Removing {local} (gone from remote)…", file=sys.stderr)
+        if worktree != "":
+            print(f"  Removing worktree at {worktree}…", file=sys.stderr)
+            check_call([
+                "git",
+                "worktree",
+                "remove",
+                "-f",
+                worktree
+            ])
+        check_call([
+            "git",
+            "branch",
+            "-D",
+            local
+        ])
+    elif remote == "":
+        if worktree == "":
+            print(f"Branch {local} has no upstream and no worktree.", file=sys.stderr)
+        else:
+            # WIP branches with a worktree and no upstream.
+            pass
+    else:
+        pass # branches with tracked upstream
+HEREDOC
 }
 
 gh-size() {
