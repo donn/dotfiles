@@ -1,6 +1,4 @@
 # PATH
-## Nix sometimes already exists but is aliased, always ensure it's prioritized at this points
-export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
