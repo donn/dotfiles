@@ -15,14 +15,7 @@ export HISTSIZE=999
 ## partial history matching for up/down
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
-
-## match macOS alt behavior outside Terminal.app
-bindkey "^[[1;3D" backward-word
-bindkey "^[[1;3C" forward-word
-
-## ensure EDITOR=nvim does not affect the terminal
-## (e.g. ctrl+R breaks in VS Code with some zsh versions)
-set -o emacs
+bindkey "^R" history-incremental-search-backward
 
 # Colors
 FGND_LBLUE=$'%{\033[94m%}'
