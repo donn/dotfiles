@@ -15,7 +15,11 @@ export HISTSIZE=999
 ## partial history matching for up/down
 bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
-bindkey "^R" history-incremental-search-backward
+
+## match macOS option key behavior outside Terminal.app
+## this one is still needed… doesn't work too well on Linux
+bindkey "^[[1;3D" backward-word
+bindkey "^[[1;3C" forward-word
 
 # Colors
 FGND_LBLUE=$'%{\033[94m%}'
