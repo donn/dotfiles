@@ -1,3 +1,4 @@
+# vi: ft=zsh
 source ~/.rc
 
 autoload -Uz add-zsh-hook
@@ -17,7 +18,7 @@ bindkey '\e[A' history-beginning-search-backward
 bindkey '\e[B' history-beginning-search-forward
 
 ## match macOS option key behavior outside Terminal.app
-## this one is still needed… doesn't work too well on Linux
+## this one is still needed even if it's a bit glitchy on linux
 bindkey "^[[1;3D" backward-word
 bindkey "^[[1;3C" forward-word
 
@@ -71,29 +72,6 @@ add-zsh-hook precmd exit_info
 alt_ps1() {
     export PS1="%~%% "
     export RPS1=""
-}
-
-# Aliases
-if command -v thefuck &> /dev/null; then
-    eval $(thefuck --alias)
-fi
-
-# Shortcuts
-cremake () {
-    if ! [ -f "$PWD/CMakeCache.txt" ]; then
-        if [ $(ls -A "$PWD" | wc -l) -ne 0 ]; then
-            echo "CMakeCache not detected in a non-empty directory. Refusing to nuke working directory." > /dev/stderr
-            return -1
-        fi
-    fi
-    
-    if [ -d "$PWD/.git" ]; then
-        echo "Git directory detected. Refusing to nuke working directory." > /dev/stderr
-        return -1
-    fi
-
-    rm -rf EmptyDirectory `find . -mindepth 1`
-    cmake $@
 }
 
 ## fzf

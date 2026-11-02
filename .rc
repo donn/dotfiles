@@ -1,3 +1,4 @@
+# vi: ft=sh
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
@@ -198,6 +199,29 @@ gh-size() {
     fi
     curl -s https://api.github.com/repos/$1 | jq .size
 }
+
+cremake () {
+    if ! [ -f "$PWD/CMakeCache.txt" ]; then
+        if [ $(ls -A "$PWD" | wc -l) -ne 0 ]; then
+            echo "CMakeCache not detected in a non-empty directory. Refusing to nuke working directory." > /dev/stderr
+            return -1
+        fi
+    fi
+    
+    if [ -d "$PWD/.git" ]; then
+        echo "Git directory detected. Refusing to nuke working directory." > /dev/stderr
+        return -1
+    fi
+
+    rm -rf EmptyDirectory `find . -mindepth 1`
+    cmake $@
+}
+
+## requires zsh/bash
+jdiff() {
+    diff <(jq -S . $1) <(jq -S . $2)
+}
+
 
 if [ -f "$HOME/.rclocal" ]; then
   source "$HOME/.rclocal"
